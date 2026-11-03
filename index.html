@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0d1930" />
+    <meta name="description" content="별의 이름, 분광형, 절대등급을 입력하여 나만의 H–R도를 만들고 PNG 이미지로 다운로드하세요." />
+    <title>별빛 H–R도 실험실</title>
+    <style>
+:root {
+  font-family: "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #1c2b43;
+  background: #f4f6f9;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+button:focus-visible, input:focus-visible { outline: 3px solid #90b7f9; outline-offset: 2px; }
+
+.site-shell { min-height: 100vh; }
+.site-header {
+  height: 71px; background: #101d32; color: #f2f7ff; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 max(38px, calc((100vw - 1460px) / 2));
+  border-bottom: 1px solid rgba(194, 211, 235, .13);
+}
+.brand { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 800; letter-spacing: .155em; white-space: nowrap; }
+.brand-light { font-weight: 400; color: #b7c6db; }
+.brand-mark { height: 37px; width: 37px; display: grid; place-items: center; color: #e7f0ff; }
+.brand-mark svg { width: 37px; height: 37px; }
+.header-label { font-size: 10px; font-weight: 750; color: #a8b8d0; letter-spacing: .18em; display: flex; align-items: center; gap: 11px; }
+.header-label-dot { width: 5px; height: 5px; border-radius: 50%; background: #f2ba7f; box-shadow: 0 0 0 4px #f2ba7f18; }
+.header-divider { width: 21px; height: 1px; background: #596b83; }
+main { max-width: 1536px; margin: 0 auto; padding: 42px 38px 76px; }
+.intro { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 2px 36px; }
+.eyebrow { display: flex; align-items: center; gap: 10px; font-size: 10px; letter-spacing: .145em; font-weight: 800; color: #697e9e; margin: 0 0 12px; }
+.eyebrow-line { width: 23px; height: 1px; background: #cf9e6e; }
+h1 { font-size: clamp(30px, 3vw, 43px); line-height: 1.21; letter-spacing: -.067em; margin: 0; font-weight: 800; color: #13243e; }
+.title-period { color: #d6a77f; }
+.intro-description { margin: 14px 0 0; color: #71809a; font-size: 14px; letter-spacing: -.025em; }
+.workspace { display: grid; grid-template-columns: minmax(335px, 382px) minmax(0,1fr); gap: 19px; align-items: stretch; }
+.left-column { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.panel { background: #fff; border: 1px solid #e4e9f1; border-radius: 13px; box-shadow: 0 7px 30px rgba(31, 51, 82, .025); }
+.input-panel { padding: 26px 27px 24px; }
+.panel-heading { display: flex; align-items: center; justify-content: space-between; }
+.section-index { margin: 0 0 8px; color: #8797af; font-size: 10px; font-weight: 800; letter-spacing: .13em; }
+.section-index span { color: #c2ccd9; margin: 0 5px; }
+h2 { margin: 0; }
+.input-panel h2, .list-panel h2, .export-panel h2 { font-size: 19px; line-height: 1.4; font-weight: 800; letter-spacing: -.055em; }
+.section-icon { font-size: 30px; color: #d4a574; font-weight: 300; padding: 2px 7px 0 0; }
+.panel-subtitle { margin: 10px 0 25px; font-size: 12px; line-height: 1.65; color: #8996a9; letter-spacing: -.015em; }
+.field { display: flex; flex-direction: column; min-width: 0; }
+.field label { color: #42536c; font-size: 12px; font-weight: 800; margin-bottom: 9px; }
+.required { color: #d49c6a; }
+.field input { width: 100%; height: 47px; padding: 0 13px; border-radius: 7px; border: 1px solid #dfe5ee; background: #f9fbfe; color: #1c2b43; font-size: 14px; transition: border-color .15s, box-shadow .15s; }
+.field input::placeholder { color: #adb8c7; }
+.field input:hover { border-color: #bac9da; }
+.field input:focus { outline: 0; border-color: #7697c6; background: #fff; box-shadow: 0 0 0 3px #7eace31b; }
+.field input[aria-invalid="true"] { border-color: #cb7775; }
+.field-row { margin-top: 21px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field small { color: #9faabd; font-size: 10px; margin-top: 7px; white-space: nowrap; }
+input[type="number"] { font-variant-numeric: tabular-nums; appearance: textfield; }
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.form-message { font-size: 11px; line-height: 1.55; color: #b44948; min-height: 20px; margin-top: 11px; }
+.form-message.success { color: #42816b; }
+.form-actions { display: flex; align-items: center; gap: 9px; }
+.primary-button { width: 100%; height: 48px; background: #233c63; color: white; border: 1px solid #233c63; border-radius: 7px; font-size: 13px; font-weight: 800; display: flex; justify-content: center; align-items: center; gap: 13px; transition: background .2s, transform .2s; }
+.primary-button:hover { background: #314f7b; transform: translateY(-1px); }
+.button-plus { font-size: 20px; font-weight: 300; line-height: 1; margin-top: -2px; }
+.cancel-button { flex: none; border: 1px solid #d4dfea; color: #596f8a; background: #f8fafc; padding: 0 12px; height: 48px; border-radius: 7px; font-size: 11px; font-weight: 700; }
+[hidden] { display: none !important; }
+
+.list-panel { padding: 21px 24px 17px; }
+.list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.list-title-wrap { display: flex; align-items: center; gap: 9px; }
+.list-panel h2 { font-size: 15px; }
+.count-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 22px; border-radius: 11px; padding: 0 7px; font-size: 11px; background: #edf3fa; color: #53719b; font-weight: 800; font-variant-numeric: tabular-nums; }
+.text-button { background: none; border: none; color: #8394ac; font-size: 11px; padding: 7px 0 7px 8px; text-decoration: underline; text-underline-offset: 3px; }
+.text-button:hover:not(:disabled) { color: #bb6c6c; }
+.text-button:disabled { color: #c5ced9; text-decoration: none; }
+.star-list { max-height: 233px; overflow: auto; scrollbar-width: thin; }
+.list-empty { background: #f8fafd; border: 1px dashed #dee5ee; border-radius: 8px; color: #a6b1bf; font-size: 12px; display: grid; place-items: center; height: 74px; }
+.star-row { display: flex; align-items: center; padding: 11px 0; border-bottom: 1px solid #eef1f5; gap: 9px; min-width: 0; }
+.star-row:last-child { border-bottom: 0; }
+.star-row.is-active { background: #f2f7ff; border-radius: 6px; }
+.star-marker { border-radius: 50%; height: 10px; width: 10px; flex: none; margin: 0 4px 0 1px; box-shadow: 0 0 0 4px #f0f4f8; }
+.star-row-info { flex: 1; min-width: 0; }
+.star-row-name { display: block; color: #293b56; font-weight: 800; font-size: 12px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.star-row-meta { display: block; margin-top: 3px; color: #8d9ab0; font-size: 10px; font-variant-numeric: tabular-nums; }
+.star-row-actions { display: flex; gap: 3px; }
+.star-row-actions button { border: 0; background: none; color: #8c9ab0; padding: 6px 5px; font-size: 11px; }
+.star-row-actions button:hover { color: #284f83; }
+.star-row-actions button.delete:hover { color: #c66767; }
+.save-hint { margin: 14px 0 0; color: #a4b0be; font-size: 10px; }
+.save-hint span { color: #7eae91; font-weight: 700; padding-right: 3px; }
+
+.modal-open { overflow: hidden; }
+.confirm-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(8, 19, 38, .58); backdrop-filter: blur(3px); }
+.confirm-dialog { width: min(100%, 370px); padding: 29px 27px 26px; background: #fff; border-radius: 13px; box-shadow: 0 20px 65px rgba(3, 13, 30, .24); text-align: center; }
+.confirm-icon { margin: 0 auto 18px; width: 50px; height: 50px; border-radius: 50%; background: #fff0ed; color: #bc5e58; display: grid; place-items: center; }
+.confirm-icon svg { width: 23px; height: 23px; }
+.confirm-dialog h2 { font-size: 19px; font-weight: 800; color: #24334a; letter-spacing: -.045em; }
+.confirm-dialog p { font-size: 12px; line-height: 1.8; color: #8390a3; margin: 11px 0 25px; }
+.confirm-dialog p strong { font-weight: 800; color: #405979; }
+.confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.confirm-actions button { height: 46px; border-radius: 7px; font-size: 13px; font-weight: 800; }
+.confirm-cancel { border: 1px solid #dce4ec; background: #f8fafc; color: #5e718e; }
+.confirm-cancel:hover { background: #edf3f9; }
+.confirm-delete { border: 1px solid #b8524f; background: #b8524f; color: #fff; }
+.confirm-delete:hover { background: #9f4441; }
+
+.export-panel { padding: 22px 24px 23px; }
+.export-top { display: flex; gap: 13px; align-items: center; }
+.export-icon { height: 39px; width: 39px; background: #edf3fc; color: #416eab; border-radius: 8px; flex: none; display: grid; place-items: center; }
+.export-icon svg { width: 18px; height: 18px; }
+.export-panel h2 { font-size: 14px; }
+.export-panel p { color: #9aa7ba; font-size: 11px; margin: 4px 0 0; }
+.export-toggle { margin: 19px 0 15px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #64758c; cursor: pointer; }
+.switch { position: relative; display: inline-flex; height: 21px; width: 38px; flex: none; }
+.switch input { opacity: 0; position: absolute; height: 100%; width: 100%; margin: 0; cursor: pointer; z-index: 1; }
+.switch-track { display: block; width: 100%; background: #d3dbe6; border-radius: 15px; transition: background .2s; }
+.switch-track::after { content: ""; display: block; width: 15px; height: 15px; border-radius: 50%; background: white; box-shadow: 0 1px 3px #1d2d4033; position: absolute; left: 3px; top: 3px; transition: transform .2s; }
+.switch input:checked + .switch-track { background: #355d94; }
+.switch input:checked + .switch-track::after { transform: translateX(17px); }
+.switch input:focus-visible + .switch-track { outline: 3px solid #90b7f9; outline-offset: 3px; }
+.download-button { width: 100%; height: 46px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid #d4dfe9; background: #f7fafd; color: #31527d; border-radius: 7px; font-size: 12px; font-weight: 800; transition: all .2s; }
+.download-button:hover:not(:disabled) { border-color: #7698c3; background: #eaf2fc; }
+.download-button:disabled { color: #b1bdcb; background: #f9fafc; }
+.download-button svg { width: 16px; height: 16px; }
+.export-panel .save-dialog-note { color: #9aa7ba; font-size: 10px; line-height: 1.5; margin: 9px 0 0; }
+.export-panel .download-message { min-height: 0; margin-top: 9px; font-size: 10px; color: #42816b; }
+.export-panel .download-message:empty { display: none; }
+
+.chart-panel { padding: 25px 27px 20px; min-width: 0; align-self: stretch; display: flex; flex-direction: column; }
+.chart-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin: 0 4px 18px; }
+.chart-heading h2 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; font-size: 21px; font-weight: 800; letter-spacing: -.06em; }
+.chart-heading-english { color: #9aa7ba; font-size: 12px; font-weight: 400; letter-spacing: .015em; }
+.plot-count { white-space: nowrap; color: #8493aa; font-size: 9px; font-weight: 800; letter-spacing: .08em; display: flex; align-items: center; gap: 6px; padding-bottom: 2px; }
+.plot-count strong { color: #28466e; font-size: 12px; }
+.plot-count-dot { display: inline-block; height: 6px; width: 6px; background: #69a0db; border-radius: 50%; }
+.chart-instruction { background: #edf3f9; color: #59718f; border: 1px solid #e3ebf4; border-radius: 7px 7px 0 0; min-height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 9px 16px; gap: 12px; }
+.instruction-left { font-size: 11px; line-height: 1.6; }
+.instruction-star { color: #bc8558; padding-right: 4px; }
+.instruction-right { font-size: 9px; letter-spacing: .07em; color: #94a5bb; white-space: nowrap; }
+.chart-container { background: #0e1a30; position: relative; border-radius: 0 0 6px 6px; overflow: hidden; }
+#hr-chart { width: 100%; height: auto; display: block; font-family: "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; overflow: visible; }
+.chart-tooltip { position: absolute; z-index: 10; pointer-events: none; padding: 10px 13px; background: #fff; color: #1c2c46; border: 1px solid #dce6f1; box-shadow: 0 7px 23px #060e1a52; border-radius: 7px; white-space: nowrap; min-width: 100px; transform: translate(0,-100%); }
+.chart-tooltip strong { display: block; margin-bottom: 4px; font-size: 13px; }
+.chart-tooltip span { display: block; color: #697c98; font-size: 11px; }
+.chart-footer { margin-top: auto; padding: 22px 5px 1px; }
+.legend-title { font-size: 9px; color: #8b99ad; letter-spacing: .17em; font-weight: 800; margin-bottom: 13px; }
+.spectrum-legend { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; }
+.legend-item { display: inline-flex; justify-content: center; align-items: center; border: 1px solid #e6ebf2; border-radius: 6px; gap: 7px; min-width: 47px; padding: 6px 10px; font-size: 11px; color: #5d718e; font-weight: 800; }
+.legend-item i { background: var(--legend-color); border: 1px solid #00000008; height: 9px; width: 9px; border-radius: 50%; display: inline-block; }
+.chart-caption { font-size: 11px; line-height: 1.7; color: #9daabc; margin: 17px 0 0; }
+.site-footer { max-width: 1536px; margin: 0 auto; padding: 0 40px 25px; display: flex; justify-content: space-between; font-size: 10px; color: #a6b1bf; }
+.site-footer span:first-child { font-weight: 800; letter-spacing: .15em; }
+
+@media (max-width: 1180px) {
+  .workspace { grid-template-columns: minmax(302px, 333px) minmax(0,1fr); gap: 15px; }
+  main { padding: 34px 23px 58px; }
+  .site-header { padding: 0 23px; }
+  .input-panel { padding: 22px 20px; }
+  .list-panel, .export-panel { padding-left: 20px; padding-right: 20px; }
+  .chart-panel { padding: 21px 17px; }
+  .chart-heading-english { display: none; }
+  .instruction-right { display: none; }
+  .field-row { gap: 8px; }
+  .field small { white-space: normal; }
+}
+@media (max-width: 790px) {
+  .workspace { grid-template-columns: 1fr; }
+  .left-column { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .input-panel { grid-row: span 2; }
+  .intro { padding-bottom: 25px; }
+  .right-column { min-height: 0; }
+  .chart-heading-english { display: inline; }
+  .chart-instruction { border-radius: 7px 7px 0 0; }
+}
+@media (max-width: 570px) {
+  .site-header { height: 63px; padding: 0 17px; }
+  .brand { font-size: 14px; gap: 6px; }
+  .brand-mark, .brand-mark svg { width: 32px; height: 32px; }
+  .header-label { display: none; }
+  main { padding: 31px 14px 45px; }
+  .eyebrow { font-size: 9px; letter-spacing: .065em; }
+  h1 { font-size: 30px; }
+  .intro-description { font-size: 12px; line-height: 1.8; }
+  .left-column { display: flex; }
+  .chart-panel { padding: 20px 11px 18px; }
+  .chart-heading { margin: 0 4px 15px; }
+  .chart-heading h2 { font-size: 18px; }
+  .chart-heading-english { display: none; }
+  .plot-count { font-size: 8px; }
+  .chart-instruction { padding: 9px 10px; }
+  .instruction-left { font-size: 10px; }
+  .chart-footer { padding: 19px 3px 0; }
+  .spectrum-legend { gap: 5px; }
+  .legend-item { min-width: 36px; padding: 6px; font-size: 10px; gap: 5px; }
+  .legend-item i { width: 7px; height: 7px; }
+  .site-footer { padding: 0 15px 20px; font-size: 9px; gap: 10px; }
+}
+
+</style>
+    
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="site-header">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none">
+              <ellipse cx="20" cy="20" rx="17" ry="7.5" transform="rotate(-37 20 20)" stroke="currentColor" stroke-width="1.6" />
+              <circle cx="20" cy="20" r="5" fill="currentColor" />
+              <circle cx="33.5" cy="9" r="2.4" fill="#f6bd72" />
+            </svg>
+          </div>
+          <span>STELLAR <span class="brand-light">LAB</span></span>
+        </div>
+        <div class="header-label"><span class="header-label-dot"></span> ASTRONOMY CLASSROOM <span class="header-divider"></span> H–R DIAGRAM</div>
+      </header>
+
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <div class="intro-copy">
+            <p class="eyebrow"><span class="eyebrow-line"></span> 별의 특성 탐구 · INTERACTIVE WORKSHEET</p>
+            <h1 id="page-title">별빛을 좌표로 그리다<span class="title-period">.</span></h1>
+            <p class="intro-description">별의 이름과 분광형, 절대등급을 입력해 나만의 H–R도를 완성해 보세요.</p>
+          </div>
+        </section>
+
+        <div class="workspace">
+          <aside class="left-column" aria-label="별 데이터 입력 및 다운로드">
+            <section class="panel input-panel" aria-labelledby="input-heading">
+              <div class="panel-heading">
+                <div>
+                  <p class="section-index">01 <span>—</span> DATA INPUT</p>
+                  <h2 id="input-heading">별 데이터 입력</h2>
+                </div>
+                <span class="section-icon" aria-hidden="true">✦</span>
+              </div>
+              <p class="panel-subtitle">한 번에 하나씩 입력하면 오른쪽 도표에 바로 나타납니다.</p>
+
+              <form id="star-form" novalidate>
+                <div class="field">
+                  <label for="star-name">별의 이름 <span class="required">*</span></label>
+                  <input id="star-name" name="name" type="text" maxlength="40" autocomplete="off" placeholder="예: 태양" required />
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="star-type">분광형 <span class="required">*</span></label>
+                    <input id="star-type" name="type" type="text" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="예: G2" required />
+                    <small>O · B · A · F · G · K · M</small>
+                  </div>
+                  <div class="field">
+                    <label for="star-magnitude">절대등급 <span class="required">*</span></label>
+                    <input id="star-magnitude" name="magnitude" type="number" step="any" placeholder="예: 4.8" required />
+                    <small>숫자로 입력 (예: −1.5)</small>
+                  </div>
+                </div>
+                <div id="form-message" class="form-message" role="status" aria-live="polite"></div>
+                <div class="form-actions">
+                  <button class="primary-button" id="submit-button" type="submit">
+                    <span id="submit-label">별 추가하기</span>
+                    <span aria-hidden="true" class="button-plus">+</span>
+                  </button>
+                  <button class="cancel-button" id="cancel-edit" type="button" hidden>수정 취소</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="panel list-panel" aria-labelledby="star-list-heading">
+              <div class="list-header">
+                <div class="list-title-wrap">
+                  <h2 id="star-list-heading">입력한 별</h2>
+                  <span id="star-count" class="count-pill">0</span>
+                </div>
+                <button id="clear-all" class="text-button" type="button" disabled>전체 삭제</button>
+              </div>
+              <div id="star-list" class="star-list" aria-live="polite">
+                <div class="list-empty">아직 입력한 별이 없습니다.</div>
+              </div>
+              <p class="save-hint"><span aria-hidden="true">✓</span> 이 브라우저에 자동 저장됩니다.</p>
+            </section>
+
+            <section class="panel export-panel" aria-labelledby="export-heading">
+              <div class="export-top">
+                <div class="export-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v3h16v-3"/></svg>
+                </div>
+                <div>
+                  <h2 id="export-heading">완성한 H–R도 저장</h2>
+                  <p>고화질 PNG 이미지로 다운로드</p>
+                </div>
+              </div>
+              <label class="export-toggle" for="export-labels">
+                <span>저장 이미지에 별 이름 표시</span>
+                <span class="switch">
+                  <input id="export-labels" type="checkbox" checked />
+                  <span class="switch-track"></span>
+                </span>
+              </label>
+              <button id="download-button" class="download-button" type="button" disabled>
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v3h16v-3"/></svg>
+                <span>PNG 이미지 다운로드</span>
+              </button>
+              <p class="save-dialog-note">지원되는 Chrome·Edge에서는 저장 위치와 파일명을 선택할 수 있어요.</p>
+              <p id="download-message" class="download-message" role="status" aria-live="polite"></p>
+            </section>
+          </aside>
+
+          <section class="right-column panel chart-panel" aria-labelledby="chart-heading">
+            <div class="chart-heading">
+              <div>
+                <p class="section-index">02 <span>—</span> VISUALIZATION</p>
+                <h2 id="chart-heading">나의 H–R도 <span class="chart-heading-english">Hertzsprung–Russell Diagram</span></h2>
+              </div>
+              <div class="plot-count"><span class="plot-count-dot"></span><strong id="plot-count">0</strong> STARS PLOTTED</div>
+            </div>
+            <div class="chart-instruction">
+              <div class="instruction-left"><span class="instruction-star" aria-hidden="true">✦</span> 점에 마우스를 올리면 별의 이름을 확인할 수 있어요.</div>
+              <span class="instruction-right">BRIGHTER ↑ &nbsp; · &nbsp; HOTTER ←</span>
+            </div>
+            <div id="chart-container" class="chart-container">
+              <svg id="hr-chart" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 742" role="img" aria-label="분광형을 가로축, 절대등급을 세로축으로 표시한 H–R도"></svg>
+              <div id="chart-tooltip" class="chart-tooltip" role="tooltip" hidden></div>
+            </div>
+            <div class="chart-footer">
+              <div class="legend-title">SPECTRAL CLASS</div>
+              <div class="spectrum-legend" aria-label="분광형 O, B, A, F, G, K, M 순서">
+                <span class="legend-item"><i style="--legend-color:#699cff"></i> O</span>
+                <span class="legend-item"><i style="--legend-color:#8fb5ff"></i> B</span>
+                <span class="legend-item"><i style="--legend-color:#d4e4ff"></i> A</span>
+                <span class="legend-item"><i style="--legend-color:#fff3d3"></i> F</span>
+                <span class="legend-item"><i style="--legend-color:#ffdc9c"></i> G</span>
+                <span class="legend-item"><i style="--legend-color:#ffb675"></i> K</span>
+                <span class="legend-item"><i style="--legend-color:#ff8971"></i> M</span>
+              </div>
+              <p class="chart-caption">* 분광형은 왼쪽이 고온, 오른쪽이 저온이며, 절대등급은 숫자가 작을수록 밝습니다.</p>
+            </div>
+          </section>
+        </div>
+      </main>
+      <div id="clear-dialog" class="confirm-overlay" hidden>
+        <div class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="clear-dialog-title" aria-describedby="clear-dialog-description">
+          <div class="confirm-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0-1 14H6L5 6m3 0V4h8v2M10 10v6m4-6v6"/></svg>
+          </div>
+          <h2 id="clear-dialog-title">입력한 별을 모두 삭제할까요?</h2>
+          <p id="clear-dialog-description"><strong id="clear-dialog-count">0</strong>개의 별이 목록과 H–R도에서 삭제됩니다.<br />이 작업은 되돌릴 수 없어요.</p>
+          <div class="confirm-actions">
+            <button id="cancel-clear" class="confirm-cancel" type="button">취소</button>
+            <button id="confirm-clear" class="confirm-delete" type="button">모두 삭제</button>
+          </div>
+        </div>
+      </div>
+      <footer class="site-footer"><span>STELLAR LAB</span><span>별의 특성 탐구를 위한 인터랙티브 학습 도구</span></footer>
+    </div>
+  <script>
+"use strict";
+
+const STORAGE_KEY = "stellar-lab-hr-stars-v1";
+const LETTERS = ["O", "B", "A", "F", "G", "K", "M"];
+const COLORS = {
+  O: "#699cff", B: "#8fb5ff", A: "#d4e4ff", F: "#fff3d3",
+  G: "#ffdc9c", K: "#ffb675", M: "#ff8971"
+};
+const SVG_NS = "http://www.w3.org/2000/svg";
+const PLOT = { left: 116, top: 88, width: 792, height: 530 };
+const CHART_SIZE = { width: 1000, height: 742 };
+
+const form = document.querySelector("#star-form");
+const nameInput = document.querySelector("#star-name");
+const typeInput = document.querySelector("#star-type");
+const magInput = document.querySelector("#star-magnitude");
+const messageEl = document.querySelector("#form-message");
+const listEl = document.querySelector("#star-list");
+const starCountEl = document.querySelector("#star-count");
+const plotCountEl = document.querySelector("#plot-count");
+const clearButton = document.querySelector("#clear-all");
+const clearDialog = document.querySelector("#clear-dialog");
+const clearDialogCount = document.querySelector("#clear-dialog-count");
+const cancelClearButton = document.querySelector("#cancel-clear");
+const confirmClearButton = document.querySelector("#confirm-clear");
+const downloadButton = document.querySelector("#download-button");
+const downloadMessage = document.querySelector("#download-message");
+const submitLabel = document.querySelector("#submit-label");
+const cancelEditButton = document.querySelector("#cancel-edit");
+const exportLabelsInput = document.querySelector("#export-labels");
+const chart = document.querySelector("#hr-chart");
+const chartContainer = document.querySelector("#chart-container");
+const tooltip = document.querySelector("#chart-tooltip");
+
+let stars = loadStars();
+let editingId = null;
+let chartRange = { min: -10, max: 15 };
+
+function spectralType(raw) {
+  const compact = String(raw).toUpperCase().replace(/\s+/g, "");
+  const match = /^([OBAFGKM])([0-9](?:\.[0-9])?)?(VII|VI|IV|III|II|IA|IB|V|I)?$/.exec(compact);
+  if (!match) return null;
+  const subtype = match[2] === undefined ? 5 : Number(match[2]);
+  return { normalized: compact, letter: match[1], subtype };
+}
+
+function loadStars() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    if (!Array.isArray(stored)) return [];
+    return stored.filter((item) => {
+      const parsed = spectralType(item?.type);
+      return typeof item?.id === "string" && typeof item?.name === "string" &&
+        item.name.length > 0 && item.name.length <= 40 && parsed &&
+        Number.isFinite(item.magnitude) && item.magnitude >= -20 && item.magnitude <= 30;
+    }).slice(0, 200).map((item) => ({
+      id: item.id, name: item.name, type: spectralType(item.type).normalized,
+      magnitude: item.magnitude
+    }));
+  } catch { return []; }
+}
+
+function persist() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stars)); }
+  catch { /* Storage can be unavailable in a private browser window. */ }
+}
+
+function newId() {
+  return typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function svgElement(tag, attributes = {}, parent = chart, textValue) {
+  const element = document.createElementNS(SVG_NS, tag);
+  for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, String(value));
+  if (textValue !== undefined) element.textContent = String(textValue);
+  parent.appendChild(element);
+  return element;
+}
+
+function formatMagnitude(value, plus = true) {
+  const str = String(Number(value));
+  if (Number(value) < 0) return `−${str.slice(1)}`;
+  return plus && Number(value) > 0 ? `+${str}` : str;
+}
+
+function resolveRange() {
+  const values = stars.map((s) => s.magnitude);
+  const min = Math.min(-10, ...values);
+  const max = Math.max(15, ...values);
+  return { min: Math.floor(min / 5) * 5, max: Math.ceil(max / 5) * 5 };
+}
+
+function positionFor(star) {
+  const parsed = spectralType(star.type);
+  const slot = LETTERS.indexOf(parsed.letter);
+  const fraction = (slot + (parsed.subtype + 0.5) / 10) / LETTERS.length;
+  return {
+    x: PLOT.left + PLOT.width * fraction,
+    y: PLOT.top + PLOT.height * (star.magnitude - chartRange.min) / (chartRange.max - chartRange.min)
+  };
+}
+
+function drawChart() {
+  tooltip.hidden = true;
+  chartRange = resolveRange();
+  chart.replaceChildren();
+
+  const defs = svgElement("defs");
+  const bg = svgElement("linearGradient", { id: "hrBg", x1: "0", x2: "1", y1: "0", y2: "1" }, defs);
+  svgElement("stop", { offset: "0%", "stop-color": "#142741" }, bg);
+  svgElement("stop", { offset: "100%", "stop-color": "#0b172a" }, bg);
+  const plotGradient = svgElement("linearGradient", { id: "hrSpectrum", x1: "0%", x2: "100%", y1: "0%", y2: "0%" }, defs);
+  for (const [index, color] of LETTERS.map((letter) => COLORS[letter]).entries()) {
+    svgElement("stop", { offset: `${(index / 6) * 100}%`, "stop-color": color, "stop-opacity": ".095" }, plotGradient);
+  }
+  const clip = svgElement("clipPath", { id: "hrPlotClip" }, defs);
+  svgElement("rect", { x: PLOT.left, y: PLOT.top, width: PLOT.width, height: PLOT.height }, clip);
+
+  svgElement("rect", { x: 0, y: 0, width: CHART_SIZE.width, height: CHART_SIZE.height, fill: "url(#hrBg)" });
+  const headerDots = [[64,35,1.2],[940,42,1.6],[965,25,1],[560,31,.9],[726,53,1.1],[325,32,.7],[966,673,1.2],[53,682,.8]];
+  headerDots.forEach(([x,y,r]) => svgElement("circle", { cx:x, cy:y, r, fill:"#d9e8ff", opacity: ".36" }));
+  svgElement("text", { x: PLOT.left, y: 51, fill: "#a9bedc", "font-size": 14, "font-weight": 800, "letter-spacing": 2.5 }, chart, "H–R DIAGRAM");
+  svgElement("text", { x: 906, y: 51, fill: "#6f8cac", "font-size": 11, "letter-spacing": 1.4, "text-anchor": "end" }, chart, "STELLAR DATA CANVAS");
+
+  svgElement("rect", { x: PLOT.left, y: PLOT.top, width: PLOT.width, height: PLOT.height, fill: "#0f1d32", stroke: "#4c6688", "stroke-width": 1 });
+  svgElement("rect", { x: PLOT.left, y: PLOT.top, width: PLOT.width, height: PLOT.height, fill: "url(#hrSpectrum)" });
+
+  // Spectral classes get equal-width bands; numeric subtypes locate the point within its band.
+  for (let i = 0; i <= LETTERS.length; i++) {
+    const x = PLOT.left + PLOT.width * i / LETTERS.length;
+    svgElement("line", { x1:x, x2:x, y1:PLOT.top, y2:PLOT.top+PLOT.height, stroke:"#7792b2", "stroke-opacity": i===0 || i===7 ? ".38" : ".16", "stroke-width": 1 });
+  }
+  for (let value = chartRange.min; value <= chartRange.max; value += 5) {
+    const y = PLOT.top + PLOT.height * (value - chartRange.min) / (chartRange.max - chartRange.min);
+    svgElement("line", { x1:PLOT.left, x2:PLOT.left+PLOT.width, y1:y, y2:y, stroke:"#9eb2cc", "stroke-opacity":".20", "stroke-width":1, "stroke-dasharray":"3 8" });
+    svgElement("line", { x1:PLOT.left-7, x2:PLOT.left, y1:y, y2:y, stroke:"#8296b0", "stroke-width":1 });
+    svgElement("text", { x:PLOT.left-19, y:y+5, "text-anchor":"end", fill:"#a2b4ce", "font-size":15, "font-variant-numeric":"tabular-nums" }, chart, formatMagnitude(value));
+  }
+
+  // The axis uses the astronomers' convention: a smaller magnitude is higher.
+  svgElement("text", { x:40, y:353, transform:"rotate(-90 40 353)", "text-anchor":"middle", fill:"#d6e2f3", "font-size":19, "font-weight":700, "letter-spacing":1 }, chart, "절대등급 (M)");
+
+  for (let index = 0; index < LETTERS.length; index++) {
+    const x = PLOT.left + PLOT.width * (index + .5) / LETTERS.length;
+    svgElement("text", { x, y:658, "text-anchor":"middle", fill:COLORS[LETTERS[index]], "font-size":26, "font-weight":800 }, chart, LETTERS[index]);
+  }
+  svgElement("text", { x:512, y:711, "text-anchor":"middle", fill:"#e0e9f8", "font-size":19, "font-weight":700 }, chart, "분광형");
+  svgElement("text", { x:116, y:711, fill:"#8298b4", "font-size":12 }, chart, "← 고온");
+  svgElement("text", { x:908, y:711, "text-anchor":"end", fill:"#8298b4", "font-size":12 }, chart, "저온 →");
+
+  if (stars.length === 0) {
+    const centerY = PLOT.top + PLOT.height / 2;
+    svgElement("circle", { cx:512, cy:centerY-29, r:33, fill:"#9fbbd6", "fill-opacity":".055", stroke:"#9db7d1", "stroke-opacity":".2", "stroke-dasharray":"3 6" });
+    svgElement("text", { x:512, y:centerY-20, "text-anchor":"middle", fill:"#9cbedf", "font-size":31 }, chart, "✧");
+    svgElement("text", { x:512, y:centerY+32, "text-anchor":"middle", fill:"#dbe6f5", "font-size":17, "font-weight":700 }, chart, "첫 번째 별을 입력해 보세요");
+    svgElement("text", { x:512, y:centerY+55, "text-anchor":"middle", fill:"#8299b5", "font-size":12 }, chart, "입력한 별이 이곳에 표시됩니다");
+    return;
+  }
+
+  const pointsGroup = svgElement("g", { "clip-path":"url(#hrPlotClip)" });
+  for (const star of stars) {
+    const { x, y } = positionFor(star);
+    const color = COLORS[spectralType(star.type).letter];
+    const group = svgElement("g", { "data-star-id":star.id, class:"star-marker-svg", tabindex:0, role:"img", "aria-label":`${star.name}, 분광형 ${star.type}, 절대등급 ${formatMagnitude(star.magnitude)}`, style:"cursor:pointer; outline:none" }, pointsGroup);
+    svgElement("circle", { cx:x, cy:y, r:17, fill:color, "fill-opacity":".13" }, group);
+    svgElement("circle", { cx:x, cy:y, r:9, fill:color, "fill-opacity":".22" }, group);
+    svgElement("circle", { cx:x, cy:y, r:5.6, fill:color, stroke:"#f2f7ff", "stroke-width":1.5 }, group);
+    svgElement("circle", { cx:x, cy:y, r:18, fill:"transparent", "pointer-events":"all" }, group);
+    svgElement("title", {}, group, `${star.name} · ${star.type} · ${formatMagnitude(star.magnitude)}`);
+  }
+}
+
+function createButton(label, action, id, className = "") {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.dataset.action = action;
+  button.dataset.id = id;
+  button.className = className;
+  button.setAttribute("aria-label", `${label}: ${stars.find((s)=>s.id===id)?.name || "별"}`);
+  return button;
+}
+
+function drawList() {
+  listEl.replaceChildren();
+  starCountEl.textContent = String(stars.length);
+  plotCountEl.textContent = String(stars.length);
+  clearButton.disabled = stars.length === 0;
+  downloadButton.disabled = stars.length === 0;
+
+  if (!stars.length) {
+    const empty = document.createElement("div");
+    empty.className = "list-empty";
+    empty.textContent = "아직 입력한 별이 없습니다.";
+    listEl.append(empty);
+    return;
+  }
+  const fragment = document.createDocumentFragment();
+  stars.forEach((star) => {
+    const row = document.createElement("div");
+    row.className = `star-row${editingId === star.id ? " is-active" : ""}`;
+    const marker = document.createElement("span");
+    marker.className = "star-marker";
+    marker.style.background = COLORS[spectralType(star.type).letter];
+    const info = document.createElement("div");
+    info.className = "star-row-info";
+    const name = document.createElement("span");
+    name.className = "star-row-name";
+    name.textContent = star.name;
+    name.title = star.name;
+    const meta = document.createElement("span");
+    meta.className = "star-row-meta";
+    meta.textContent = `${star.type}  ·  ${formatMagnitude(star.magnitude)} 등급`;
+    info.append(name, meta);
+    const actions = document.createElement("div");
+    actions.className = "star-row-actions";
+    actions.append(createButton("수정", "edit", star.id), createButton("삭제", "delete", star.id, "delete"));
+    row.append(marker, info, actions);
+    fragment.append(row);
+  });
+  listEl.append(fragment);
+}
+
+function render() {
+  drawList();
+  drawChart();
+  persist();
+}
+
+function showFormMessage(message, success = false) {
+  messageEl.textContent = message;
+  messageEl.classList.toggle("success", success);
+}
+
+function stopEditing() {
+  editingId = null;
+  form.reset();
+  [nameInput, typeInput, magInput].forEach((input) => input.removeAttribute("aria-invalid"));
+  submitLabel.textContent = "별 추가하기";
+  cancelEditButton.hidden = true;
+  showFormMessage("");
+}
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  [nameInput, typeInput, magInput].forEach((input) => input.removeAttribute("aria-invalid"));
+  const name = nameInput.value.trim().replace(/\s+/g, " ");
+  const type = spectralType(typeInput.value);
+  const rawMagnitude = magInput.value.trim();
+  const magnitude = Number(rawMagnitude);
+  let error = "";
+  let problemInput = null;
+  if (!name) { error = "별의 이름을 입력해 주세요."; problemInput = nameInput; }
+  else if (!type) { error = "분광형은 O, B, A, F, G, K, M과 0~9의 하위형으로 입력해 주세요. (예: G2, B8, A0 V)"; problemInput = typeInput; }
+  else if (!rawMagnitude || !Number.isFinite(magnitude)) { error = "절대등급을 숫자로 입력해 주세요."; problemInput = magInput; }
+  else if (magnitude < -20 || magnitude > 30) { error = "절대등급은 −20부터 +30 사이로 입력해 주세요."; problemInput = magInput; }
+  else if (!editingId && stars.length >= 200) { error = "최대 200개의 별까지 추가할 수 있어요."; }
+  if (error) {
+    showFormMessage(error);
+    if (problemInput) { problemInput.setAttribute("aria-invalid", "true"); problemInput.focus(); }
+    return;
+  }
+
+  if (editingId) {
+    const index = stars.findIndex((star) => star.id === editingId);
+    if (index !== -1) stars[index] = { id: editingId, name, type: type.normalized, magnitude };
+  } else {
+    stars.push({ id: newId(), name, type: type.normalized, magnitude });
+  }
+  stopEditing();
+  render();
+  nameInput.focus();
+  showFormMessage("별이 H–R도에 표시되었습니다.", true);
+  window.setTimeout(() => { if (messageEl.classList.contains("success")) showFormMessage(""); }, 3000);
+});
+
+cancelEditButton.addEventListener("click", () => { stopEditing(); drawList(); });
+
+listEl.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+  const star = stars.find((item) => item.id === button.dataset.id);
+  if (!star) return;
+  if (button.dataset.action === "edit") {
+    editingId = star.id;
+    nameInput.value = star.name;
+    typeInput.value = star.type;
+    magInput.value = String(star.magnitude);
+    submitLabel.textContent = "수정 완료하기";
+    cancelEditButton.hidden = false;
+    showFormMessage("");
+    drawList();
+    nameInput.focus();
+    nameInput.scrollIntoView({ behavior:"smooth", block:"center" });
+  } else if (button.dataset.action === "delete") {
+    stars = stars.filter((item) => item.id !== star.id);
+    if (editingId === star.id) stopEditing();
+    render();
+  }
+});
+
+function closeClearDialog(returnFocus = true) {
+  clearDialog.hidden = true;
+  document.body.classList.remove("modal-open");
+  if (returnFocus && !clearButton.disabled) clearButton.focus();
+}
+
+clearButton.addEventListener("click", () => {
+  if (!stars.length) return;
+  clearDialogCount.textContent = String(stars.length);
+  clearDialog.hidden = false;
+  document.body.classList.add("modal-open");
+  cancelClearButton.focus();
+});
+
+cancelClearButton.addEventListener("click", () => closeClearDialog());
+confirmClearButton.addEventListener("click", () => {
+  if (clearDialog.hidden) return;
+  closeClearDialog(false);
+  stars = [];
+  stopEditing();
+  render();
+  showFormMessage("입력한 별이 모두 삭제되었습니다.", true);
+  nameInput.focus();
+});
+
+clearDialog.addEventListener("click", (event) => {
+  if (event.target === clearDialog) closeClearDialog();
+});
+document.addEventListener("keydown", (event) => {
+  if (clearDialog.hidden) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeClearDialog();
+  } else if (event.key === "Tab") {
+    // Keep keyboard focus inside the in-app confirmation while it is open.
+    const first = cancelClearButton;
+    const last = confirmClearButton;
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+});
+
+function tooltipFor(star) {
+  tooltip.replaceChildren();
+  const heading = document.createElement("strong");
+  heading.textContent = star.name;
+  const detail = document.createElement("span");
+  detail.textContent = `${star.type} · 절대등급 ${formatMagnitude(star.magnitude)}`;
+  tooltip.append(heading, detail);
+  tooltip.hidden = false;
+}
+
+function positionTooltip(event) {
+  const bounds = chartContainer.getBoundingClientRect();
+  const relX = event.clientX - bounds.left;
+  const relY = event.clientY - bounds.top;
+  const x = Math.max(6, Math.min(bounds.width - tooltip.offsetWidth - 6, relX + 14));
+  const y = Math.max(tooltip.offsetHeight + 8, relY - 10);
+  tooltip.style.left = `${x}px`;
+  tooltip.style.top = `${y}px`;
+}
+
+chart.addEventListener("pointerover", (event) => {
+  const group = event.target.closest?.("[data-star-id]");
+  if (!group) return;
+  const star = stars.find((item) => item.id === group.getAttribute("data-star-id"));
+  if (!star) return;
+  tooltipFor(star);
+  positionTooltip(event);
+});
+chart.addEventListener("pointermove", (event) => {
+  if (!tooltip.hidden) positionTooltip(event);
+});
+chart.addEventListener("pointerout", (event) => {
+  if (!event.relatedTarget?.closest?.("[data-star-id]") || event.relatedTarget.closest("[data-star-id]") !== event.target.closest?.("[data-star-id]")) tooltip.hidden = true;
+});
+chart.addEventListener("focusin", (event) => {
+  const group = event.target.closest?.("[data-star-id]");
+  if (!group) return;
+  const star = stars.find((item) => item.id === group.getAttribute("data-star-id"));
+  if (!star) return;
+  tooltipFor(star);
+  const point = positionFor(star);
+  const bounds = chartContainer.getBoundingClientRect();
+  tooltip.style.left = `${Math.min(bounds.width - tooltip.offsetWidth - 6, point.x / CHART_SIZE.width * bounds.width + 10)}px`;
+  tooltip.style.top = `${Math.max(tooltip.offsetHeight + 8, point.y / CHART_SIZE.height * bounds.height - 10)}px`;
+});
+chart.addEventListener("focusout", () => { tooltip.hidden = true; });
+
+function widthEstimate(name) {
+  let width = 19;
+  for (const c of name) width += /[\u1100-\u11ff\u3130-\u318f\uac00-\ud7af]/.test(c) ? 14 : /[il., ']/.test(c) ? 4.2 : 8.5;
+  return Math.min(600, width);
+}
+
+function drawExportLabels(exportSvg) {
+  const layer = svgElement("g", { id:"export-labels" }, exportSvg);
+  const occupied = [];
+  for (const star of stars) {
+    const { x, y } = positionFor(star);
+    const width = widthEstimate(star.name);
+    const height = 25;
+    const candidates = [
+      { x:x+14, y:y-31 }, { x:x+14, y:y+9 },
+      { x:x-width-14, y:y-31 }, { x:x-width-14, y:y+9 },
+      { x:x-width/2, y:y-40 }, { x:x-width/2, y:y+16 }
+    ];
+    const valid = candidates.filter(({x:cx,y:cy}) =>
+      cx >= PLOT.left+2 && cx+width <= PLOT.left+PLOT.width-2 &&
+      cy >= PLOT.top+2 && cy+height <= PLOT.top+PLOT.height-2);
+    const location = valid.find(({x:cx,y:cy}) => occupied.every((r) =>
+      cx+width+5 < r.x || cx > r.x+r.width+5 || cy+height+5 < r.y || cy > r.y+r.height+5)) || valid[0];
+    if (!location) continue;
+    occupied.push({ ...location, width, height });
+    svgElement("rect", { x:location.x, y:location.y, width, height, rx:5, fill:"#10223c", "fill-opacity":".94", stroke:COLORS[spectralType(star.type).letter], "stroke-opacity":".66", "stroke-width":.8 }, layer);
+    svgElement("text", { x:location.x+9, y:location.y+17, fill:"#f2f6fe", "font-size":13, "font-weight":650 }, layer, star.name);
+  }
+}
+
+async function saveImage() {
+  if (!stars.length || downloadButton.disabled) return;
+  downloadButton.disabled = true;
+  const filename = `H-R도_${new Date().toLocaleDateString("sv-SE")}.png`;
+  let saveHandle = null;
+  let url;
+  try {
+    // The native picker needs a direct user gesture, so it must open before
+    // asynchronous SVG/PNG conversion. The user can choose both path and name.
+    if (window.isSecureContext && typeof window.showSaveFilePicker === "function") {
+      downloadMessage.textContent = "저장 위치와 파일명을 선택해 주세요.";
+      try {
+        saveHandle = await window.showSaveFilePicker({
+          suggestedName: filename,
+          types: [{ description: "PNG 이미지", accept: { "image/png": [".png"] } }],
+          excludeAcceptAllOption: true
+        });
+      } catch (error) {
+        if (error.name === "AbortError") {
+          downloadMessage.textContent = "저장을 취소했습니다.";
+          return;
+        }
+        // Browsers can expose the API but disallow it in embedded views.
+        console.warn("Native save dialog unavailable; using browser download.", error);
+      }
+    }
+    downloadMessage.textContent = "이미지를 생성하고 있어요…";
+    const clone = chart.cloneNode(true);
+    clone.removeAttribute("id");
+    clone.setAttribute("width", CHART_SIZE.width);
+    clone.setAttribute("height", CHART_SIZE.height);
+    clone.setAttribute("xmlns", SVG_NS);
+    clone.querySelectorAll("[tabindex], [role], [aria-label], title").forEach((el) => {
+      el.removeAttribute("tabindex");
+      el.removeAttribute("role");
+      el.removeAttribute("aria-label");
+      if (el.tagName.toLowerCase() === "title") el.remove();
+    });
+    if (exportLabelsInput.checked) drawExportLabels(clone);
+    const source = new XMLSerializer().serializeToString(clone);
+    const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+    url = URL.createObjectURL(blob);
+    const img = new Image();
+    await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = url; });
+    const canvas = document.createElement("canvas");
+    canvas.width = CHART_SIZE.width * 2;
+    canvas.height = CHART_SIZE.height * 2;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Canvas unavailable");
+    context.scale(2, 2);
+    context.drawImage(img, 0, 0, CHART_SIZE.width, CHART_SIZE.height);
+    const png = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+    if (!png) throw new Error("PNG conversion failed");
+    if (saveHandle) {
+      const writer = await saveHandle.createWritable();
+      await writer.write(png);
+      await writer.close();
+      downloadMessage.textContent = "선택한 위치에 PNG 이미지가 저장되었습니다.";
+    } else {
+      URL.revokeObjectURL(url);
+      url = URL.createObjectURL(png);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      downloadMessage.textContent = "PNG 이미지가 다운로드되었습니다. 저장 위치는 브라우저 설정을 따릅니다.";
+    }
+  } catch (error) {
+    console.error("PNG export failed:", error);
+    downloadMessage.textContent = "이미지를 저장하지 못했어요. 다시 시도해 주세요.";
+  } finally {
+    downloadButton.disabled = stars.length === 0;
+    if (url) window.setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+}
+
+downloadButton.addEventListener("click", saveImage);
+render();
+
+</script>
+</body>
+</html>
